@@ -4,3 +4,9 @@ server:
 spring:
   thymeleaf:
     cache: false
+
+  profiles:
+    active: dev
+
+  application:
+    name: word-note

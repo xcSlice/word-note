@@ -11,5 +11,8 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class ResponseUtil {
+    public ResponseEntity ok(){
+        return ResponseEntity.ok().build();
+    }
 
 }

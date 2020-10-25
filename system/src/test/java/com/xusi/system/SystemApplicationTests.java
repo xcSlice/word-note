@@ -2,10 +2,15 @@ package com.xusi.system;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xusi.system.entity.User;
 import com.xusi.system.entity.Word;
+import com.xusi.system.mapper.UserMapper;
+import com.xusi.system.service.imp.UserServiceImp;
 import com.xusi.system.utils.ESUtil;
 import com.xusi.system.utils.ExcelUtil;
 import com.xusi.system.utils.JsonUtil;
+import com.xusi.system.utils.JwtUtil;
+import org.apache.shiro.crypto.hash.Md5Hash;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -38,6 +43,7 @@ import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +61,8 @@ class SystemApplicationTests {
     private ExcelUtil excelUtil;
     @Resource
     private JsonUtil jsonUtil;
+    @Resource
+    private JwtUtil jwtUtil;
 //
 //    final String PATH = "./excel/";
 
@@ -98,6 +106,22 @@ class SystemApplicationTests {
         esUtil.deleteAll();
     }
 
+    @Resource
+    UserServiceImp userService;
+    @Resource
+    UserMapper userMapper;
+    @Test
+    void TestUser(){
+        User user = new User();
+        user.setUsername("admin222");
+        user.setPassword(jwtUtil.passwordEncode("admin222"));
+        userMapper.insert(user);
+    }
+
+    @Test
+    void TestHash(){
+
+    }
 
 
 
