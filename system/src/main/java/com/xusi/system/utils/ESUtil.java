@@ -4,27 +4,25 @@ import com.alibaba.fastjson.JSON;
 import com.xusi.system.entity.Word;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
-import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -82,28 +80,28 @@ public class ESUtil {
         }
     }
 
-    public SearchResponse searchByTerm(String name,String value) throws IOException {
+    public SearchResponse searchByTerm(String name,String value,boolean highlight) throws IOException {
         // 1. 构建查询条件
         TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery(name, value);
-//        // 2. 搜索资源构造器
-//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-//        searchSourceBuilder.query(termQueryBuilder);
-//
-//        // 3. 查询请求
-//        SearchRequest request = new SearchRequest(getIndex());
-//        request.source(searchSourceBuilder);
-//        // 4. 获取响应
-//        return client.search(request, RequestOptions.DEFAULT);
-        return search(termQueryBuilder);
+
+        if(highlight){
+            return search(termQueryBuilder,highlight(name));
+        } else {
+            return search(termQueryBuilder,null);
+        }
     }
 
     // 传入查询条件 获取查询结果
-    public SearchResponse search(QueryBuilder builder) throws IOException {
+    public SearchResponse search(QueryBuilder builder,HighlightBuilder highlightBuilder) throws IOException {
 //        // 1. 构建查询条件
 //        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery(name, value);
 //        // 2. 搜索资源构造器
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(builder);
+        // highlightbuilder not null
+        if (highlightBuilder != null) {
+            searchSourceBuilder.highlighter(highlightBuilder);
+        }
 
         // 3. 查询请求
         SearchRequest request = new SearchRequest(getIndex());
@@ -112,4 +110,80 @@ public class ESUtil {
         return client.search(request, RequestOptions.DEFAULT);
     }
 
+    // 分词查询
+    public SearchResponse searchByMatch(String name, String value,boolean highlight) throws IOException {
+        MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery(name,value);
+        if(highlight){
+            return search(matchQueryBuilder,highlight(name));
+        } else {
+            return search(matchQueryBuilder,null);
+        }
+    }
+
+    // 高亮, 可选项
+    public HighlightBuilder highlight(String name){
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field(name);
+        highlightBuilder.preTags("<em>");
+        highlightBuilder.postTags("</em>");
+        return highlightBuilder;
+    }
+
+    // 查询所有
+    public SearchResponse searchAll() throws IOException {
+        MatchAllQueryBuilder matchAllQueryBuilder = QueryBuilders.matchAllQuery();
+        SearchResponse search = search(matchAllQueryBuilder, null);
+        return search;
+    }
+
+    // 获取id
+    public List<String> getId(String name,String value) throws IOException{
+        List<String> list = new ArrayList<>();
+        SearchResponse response = searchByTerm(name, value, false);
+        response.getHits().forEach( word -> {
+            list.add(word.getId());
+        });
+        return list;
+    }
+    // 获取所有id
+    public List<String> getAllId() throws IOException{
+        List<String> list = new ArrayList<>();
+        MatchAllQueryBuilder matchAllQueryBuilder = QueryBuilders.matchAllQuery();
+        SearchResponse search = search(matchAllQueryBuilder, null);
+        search.getHits().forEach( word -> {
+            list.add(word.getId());
+        });
+        return list;
+    }
+
+    // 根据id 获取删除请求
+    public DeleteRequest getDeleteRequest(String id) throws IOException{
+        DeleteRequest request = new DeleteRequest(getIndex());
+        request.id(id);
+        return request;
+    }
+
+    // 根据List<id> 多个删除
+    public void deleteBatch(List<String> ids) throws IOException{
+        BulkRequest bulkRequest = new BulkRequest();
+        ids.forEach( id -> {
+            try {
+                bulkRequest.add(getDeleteRequest(id));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        client.bulk(bulkRequest,RequestOptions.DEFAULT);
+    }
+
+    //删除所有
+    public void deleteAll() throws IOException {
+        deleteBatch(getAllId());
+    }
+
+    // 根据id删除
+    public void deleteOne(String id) throws IOException{
+        DeleteRequest deleteRequest = getDeleteRequest(id);
+        client.delete(deleteRequest,RequestOptions.DEFAULT);
+    }
 }

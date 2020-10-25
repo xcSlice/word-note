@@ -1,9 +1,11 @@
 package com.xusi.system;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.xusi.system.entity.Word;
 import com.xusi.system.utils.ESUtil;
 import com.xusi.system.utils.ExcelUtil;
+import com.xusi.system.utils.JsonUtil;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -22,13 +24,17 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlighterContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.io.*;
@@ -47,52 +53,54 @@ class SystemApplicationTests {
 
     @Resource
     private ExcelUtil excelUtil;
-
-    final String PATH = "./excel/";
+    @Resource
+    private JsonUtil jsonUtil;
+//
+//    final String PATH = "./excel/";
 
     @Test
-    void contextLoads() {
+    void contextLoads() throws  IOException{
+        SearchResponse searchResponse = esUtil.searchByMatch("name", "peach", true);
+        searchResponse.getHits().forEach(
+                x->{
+                    JSONObject jsonObject = JSON.parseObject(x.getSourceAsString());
+//                    jsonObject.getJSONObject("name").put("name",x.getHighlightFields().get("name").fragments()[0].toString());
+                    jsonObject.put("name","helima");
+                    System.out.println("jsonObject = " + jsonObject);
+
+                    System.out.println("jsonObject.get(\"name\") = " + jsonObject.get("name"));
+                }
+        );
     }
 
     @Test
-    void testExcelRead() throws IOException {
-        List<Word> l = excelUtil.read();
-        l.forEach(item -> {
-            System.out.println("item = " + item);
+    void searchAll() throws IOException {
+        SearchResponse response = esUtil.searchAll();
+        List<Word> list = jsonUtil.parseWordList(response);
+        for (Word word : list) {
+            System.out.println("word = " + word);
+        }
+
+    }
+
+    @Test
+    void getId() throws IOException {
+        List<String> allId = esUtil.getAllId();
+        allId.forEach(w -> {
+            System.out.println("w = " + w);
         });
+        List<String> id = esUtil.getId("name", "peach");
+        System.out.println("id.get(0) = " + id.get(0));
+
+    }
+    @Test
+    void deleteAll() throws IOException{
+        esUtil.deleteAll();
     }
 
-    @Test
-    void testWrite() throws IOException{
-        List<Word> list = new ArrayList<>();
-        list.add(new Word("orange","orange","or","or","or"));
-        list.add(new Word("orange","orange","or","or","or"));
-        list.add(new Word("orange","orange","or","or","or"));
-        System.out.println("excelUtil.write(list) = " + excelUtil.write(list));
-    }
 
-    @Test
-    void testEs() throws IOException {
-        esUtil.init();
-        List<Word> list = excelUtil.read();
-        esUtil.bulk(list);
-        System.out.println("success");
-    }
 
-    @Test
-    void testEsSearch() throws IOException {
-        SearchHits searchHits = esUtil.searchByTerm("name", "orange");
-        List<String> list = new ArrayList<>();
-        searchHits.forEach( item -> {
-            list.add(item.getSourceAsString());
-        });
-        list.forEach( item -> {
-            System.out.println("item = " + item);
-            Object parse = JSON.parse(item);
-            Word word = (Word) parse;
-            System.out.println(word.getMean());
-        });
-    }
+
 
 
 
