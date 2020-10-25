@@ -7,6 +7,12 @@
 
     elasticsearch :     搜索
     POI :               管理excel
+    
+> 测试网址
+
+    运行后.
+    Swagger.                    http://localhost:8080/swagger-ui.html
+    测试文件上传和文件下载地址.   http://localhost:8080/index
 > 文件结构
 
     模块
@@ -22,6 +28,21 @@
             
                
 ## 版本说明
+
+### version beta 0.3 : '引入shiro,mybaits,jjw'
+> 说明
+
+    shiro 已引入.
+    mybatis plus 已引入.
+    权限管理可以通过用户名和密码登录获取 token, 请求通过携带返回的token可以进行权限认证.
+> 下一版本
+
+    引入 vue
+    编写简单的前端页面 :
+        文件上传和下载页面
+        搜索页面
+        登录页面
+        注册页面
 
 ### version beta 0.2 : interface-finished
 > 说明
@@ -44,7 +65,3 @@
     完成接口.
     引入swagger.
     
- > token
-
-eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ6aGFuZ3NhbiIsImF1dGgiOiJVU0VSIiwiaXNzIjoieHVzaSIsImV4cCI6MTYwMzYzOTk3MywiaWF0IjoxNjAzNjM2MzczLCJ1c2VybmFtZSI6InpoYW5nc2FuIn0.cwxvjL3IDLju_viBgLfQdvu0wgDW9YZi5qbgY-kdrmY
-eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ6aGFuZ3NhbiIsImF1dGgiOiJVU0VSIiwiaXNzIjoieHVzaSIsImV4cCI6MTYwMzY0MDcxMSwiaWF0IjoxNjAzNjM3MTExLCJ1c2VybmFtZSI6InpoYW5nc2FuIn0.pB7WtLs6HweUiv-x-ZmPOpY0PRRN4RtgXg7J8UStBW4
