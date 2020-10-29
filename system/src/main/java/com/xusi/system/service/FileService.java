@@ -1,11 +1,11 @@
 package com.xusi.system.service;
 
 import com.xusi.system.utils.ExcelUtil;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import com.xusi.system.utils.JwtUtil;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.*;
 
 /**
@@ -16,7 +16,21 @@ import java.io.*;
  **/
 @Service
 public class FileService {
-    String path = ExcelUtil.SAVE_ADDRESS + ExcelUtil.SEVEN_SUFFIX;
+
+    @Resource
+    private ExcelUtil excelUtil;
+
+    String path = "";
+
+
+
+    private void setPath(){
+        if(path.equals("")){
+            // 路径 + 用户id + 文件名后缀
+            this.path = excelUtil.fullName();
+        }
+    }
+
     public boolean uploadFile(byte[] file,String filename) throws IOException {
 
         // 文件校验不通过
@@ -24,34 +38,23 @@ public class FileService {
             return false;
         }
         // 写入文件目录校验
-        fileIsExist(path);
-        FileOutputStream fos = new FileOutputStream(path);
+        setPath();
+        excelUtil.fileIsNotExistToCreate(path);
+        FileOutputStream fos = null;
 
         try {
+            fos = new FileOutputStream(path);
             fos.write(file);
             fos.flush();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            assert fos != null;
             fos.close();
         }
         return true;
     }
 
-    /**
-    * @Description: 文件目录不存在则创建
-    * @Params: [filename]
-    * @return: void
-    * @Author: xusi
-    * @Date: 2020/10/23
-    */
-    private void fileIsExist(String filename) {
-        File file = new File(filename);
-        // 父目录不存在则创建
-        if (!file.getParentFile().exists()){
-            file.getParentFile().mkdirs();
-        }
-    }
 
     /**
     * @Description: 检查文件是否符合要求
@@ -70,7 +73,16 @@ public class FileService {
 
     }
 
+
+    /**
+    * @Description: 下载文件
+    * @Params: [filename]
+    * @return: boolean
+    * @Author: xusi
+    * @Date: 2020/10/28
+    */
     public boolean downloadFile(String filename) throws IOException {
+        setPath();
         File file = new File(path);
         // 要下载的文件存在 且 传入的下载文件路径名正确
         if (!file.exists() && fileCheck(filename)){

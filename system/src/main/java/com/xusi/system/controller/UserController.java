@@ -40,6 +40,7 @@ public class UserController {
         }
     }
 
+    @ApiOperation("使用用户名和密码注册一个普通用户")
     @PostMapping("/register")
     public ResponseEntity register(String username, String password){
         if (userService.isExistByName(username)) {

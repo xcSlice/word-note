@@ -25,7 +25,7 @@ public class JwtUtil {
     private static final String SLAT = "@dfsa3$%fd^xxaf";
     
     private static final String ISS = "xusi";
-    private static final long EXPIRE_TIME = 60*60;
+    private static final long EXPIRE_TIME = 60*60*60;  // 一天
     private static final long LONG_EXPIRE_TIME = 60*60*24*7;
     
 

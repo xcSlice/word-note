@@ -7,6 +7,8 @@
 
     elasticsearch :     搜索
     POI :               管理excel
+    mybatis-plus        登录管理
+    
     
 > 测试网址
 
@@ -17,6 +19,10 @@
 
     模块
     common - 通用工具, 暂时未使用
+    word-search - 查询单词
+        - com.xusi.search
+            - entity - 实体类
+            - util  - 工具类
     system - 主要的功能实现
         - static    - 存放 excel 文件
         - com.xusi.system
@@ -29,14 +35,15 @@
                
 ## 版本说明
 
-### version beta 0.3 : '引入shiro,mybaits,jjw'
+### version beta 0.3 : '引入shiro,mybaits,jjwt'
 > 说明
 
     shiro 已引入.
     mybatis plus 已引入.
     权限管理可以通过用户名和密码登录获取 token, 请求通过携带返回的token可以进行权限认证.
 > 下一版本
-
+ 
+    完善权限管理接口
     引入 vue
     编写简单的前端页面 :
         文件上传和下载页面

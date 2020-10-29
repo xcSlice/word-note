@@ -1,5 +1,6 @@
 package com.xusi.system.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xusi.system.entity.Word;
 import com.xusi.system.service.ESService;
@@ -9,10 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -25,7 +23,8 @@ import java.util.List;
  * @create:2020-10-24 13:26
  **/
 @Api(tags = "ES搜索")
-@RestController("/es")
+@RestController
+@RequestMapping("/es")
 public class ESController {
     @Resource
     private ESService esService;
@@ -35,7 +34,7 @@ public class ESController {
     private JsonUtil jsonUtil;
 
     @ApiOperation("将excel中的数据上传到es服务器中")
-    @PostMapping("/upload")
+    @GetMapping("/upload")
     public ResponseEntity upload() {
         try{
             List<Word> words = excelUtil.read();
@@ -46,7 +45,7 @@ public class ESController {
         }
     }
     @ApiOperation("将es服务器中的数据下载到本地")
-    @PostMapping("/download")
+    @GetMapping("/download")
     public ResponseEntity download() {
         try{
             SearchResponse response = esService.searchAll();
@@ -61,8 +60,9 @@ public class ESController {
 
     @ApiOperation("上传一个单词到es服务器中")
     @PostMapping("/post")
-    public ResponseEntity post(Word word){
+    public ResponseEntity post(@RequestBody  String json){
         try {
+            Word word = JSONObject.parseObject(json, Word.class);
             esService.post(word);
             return ok();
         }catch (IOException e){
@@ -123,6 +123,7 @@ public class ESController {
         }
     }
 
+    @PostMapping("/ids")
     @ApiOperation("根据属性和值查询id")
     public ResponseEntity getId(String name ,String value){
         try{

@@ -2,6 +2,9 @@ package com.xusi.system.controller;
 
 import com.xusi.system.service.FileService;
 import com.xusi.system.utils.ExcelUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +29,14 @@ import java.io.IOException;
  * @author: xusi
  * @create:2020-10-23 11:33
  **/
+@Api(tags = "文件管理模块")
 @Controller
 public class FileController {
     @Resource
     FileService fileService;
 
-    private String filePath = ExcelUtil.SAVE_ADDRESS +ExcelUtil.SEVEN_SUFFIX;
     // 上传文件
+    @ApiOperation("文件上传转发")
     @GetMapping("/upload")
     public String uploading() {
         //跳转到 templates 目录下的 uploading.html
@@ -40,6 +44,7 @@ public class FileController {
     }
 
     //处理文件上传
+    @ApiOperation("文件上传,不能在 swagger 中测试, 需要传入一个 excel 文件")
     @PostMapping("/uploading")
     @ResponseBody
     public ResponseEntity<Boolean> uploading(@RequestParam("file") MultipartFile file,
@@ -53,9 +58,9 @@ public class FileController {
         return ResponseEntity.ok(result);
     }
 
-
+    @ApiOperation("文件下载")
     @PostMapping("downloading")
-    public ResponseEntity<Boolean> download(String filename) throws IOException {
+    public ResponseEntity<Boolean> download(@ApiParam("文件下载地址") String filename) throws IOException {
         boolean result = fileService.downloadFile(filename);
         return ResponseEntity.ok(result);
     }

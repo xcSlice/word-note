@@ -144,7 +144,7 @@ import java.util.Scanner;
             strategy.setControllerMappingHyphenStyle(true);
             strategy.setTablePrefix(pc.getModuleName() + "_");
             mpg.setStrategy(strategy);
-            mpg.setTemplateEngine(new VelocityTemplateEngine());
+                mpg.setTemplateEngine(new VelocityTemplateEngine());
             mpg.execute();
         }
 

@@ -7,8 +7,10 @@ import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,11 @@ public class ExcelUtil {
     public final static String THREE_SUFFIX = ".xls";
     public final static String SHEET_NAME = "word";
     public final static String SAVE_ADDRESS = "./static/excel/word";
+
+    @Resource
+    private JwtUtil jwtUtil;
+
+    String userId = "";
 
     // 返回读取的数据
     public List<Word> read() throws IOException {
@@ -84,7 +91,7 @@ public class ExcelUtil {
         return true;
     }
 
-
+    // 文件不存在则创建
     public void fileIsNotExistToCreate(String filename){
         File file = new File(filename);
         if (!file.getParentFile().exists()){
@@ -94,10 +101,17 @@ public class ExcelUtil {
 
 
 
-
+    // 获取登录用户id
+    private String getUserId(){
+        if (userId.equals("")){
+            String token = SecurityUtils.getSubject().getPrincipal().toString();
+            userId = jwtUtil.getSubject(token);
+        }
+        return userId;
+    }
 
     public String fullName(){
-        return SAVE_ADDRESS + SEVEN_SUFFIX;
+        return SAVE_ADDRESS + getUserId() + SEVEN_SUFFIX;
     }
 
 }

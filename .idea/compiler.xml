@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="common" />
         <module name="system" />
+        <module name="word-search" />
       </profile>
     </annotationProcessing>
   </component>
