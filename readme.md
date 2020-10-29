@@ -15,6 +15,7 @@
     运行后.
     Swagger.                    http://localhost:8080/swagger-ui.html
     测试文件上传和文件下载地址.   http://localhost:8080/index
+    前端页面                    https://github.com/xcSlice/word-note-vue.git
 > 文件结构
 
     模块
@@ -35,6 +36,19 @@
                
 ## 版本说明
 
+### version beta 0.4 'word-search'
+> 说明
+
+    完成了前端测试页面的基础功能, 一些功能只完成了测试,确定其可使用, 具体的功能未完成
+    加入了一个 ==word-search== 模块, 其使用了 jsoup 来爬取查询的单词,前端页面也完成了
+    完善了文件管理功能, 根据当前登录的用户来读写 excel 文件
+    完善了 Swagger 的说明
+    
+> 下一版本
+
+    完善前端页面后, 优化项目 
+    引入设计模式
+    部署到服务器
 ### version beta 0.3 : '引入shiro,mybaits,jjwt'
 > 说明
 
